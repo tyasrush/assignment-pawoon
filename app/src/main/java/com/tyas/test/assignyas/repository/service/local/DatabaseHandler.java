@@ -118,7 +118,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     // Deleting single contact
-    public void deleteContact(Data data) {
+    public void deleteData(Data data) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_TITLE, KEY_ID + " = ?",
                 new String[] { String.valueOf(data.getId()) });

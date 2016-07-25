@@ -35,14 +35,14 @@ public class DataActivity extends AppCompatActivity implements DatabaseHandler.S
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        DatabaseHandler db = new DatabaseHandler(this);
-        db.getAllData(this);
-
         dataAdapter = new DataAdapter(datas);
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_home);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(dataAdapter);
+
+        DatabaseHandler db = new DatabaseHandler(this);
+        db.getAllData(this);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

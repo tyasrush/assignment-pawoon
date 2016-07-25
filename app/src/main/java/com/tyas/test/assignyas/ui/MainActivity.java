@@ -9,6 +9,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,12 +20,15 @@ import com.tyas.test.assignyas.repository.entity.Data;
 import com.tyas.test.assignyas.repository.service.local.DatabaseHandler;
 import com.tyas.test.assignyas.repository.service.server.GetService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements GetService.LoadPattern {
 
     private ProgressDialog progressDialog;
+    private List<Data> datas = new ArrayList<>();
+    private DatabaseHandler db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,11 +40,8 @@ public class MainActivity extends AppCompatActivity implements GetService.LoadPa
         progressDialog.setMessage("Loading data ... ");
         progressDialog.show();
 
-        new Handler(getMainLooper()).postDelayed(new Runnable() {
-            @Override public void run() {
-                GetService.getInstance().getAll(MainActivity.this);
-            }
-        }, 1000);
+        db = new DatabaseHandler(this);
+        GetService.getInstance().getAll(this);
     }
 
     public void onDataButtonClick(View view) {
@@ -48,8 +49,8 @@ public class MainActivity extends AppCompatActivity implements GetService.LoadPa
     }
 
     @Override public void onLoadSuccess(List<Data> datas) {
+        this.datas.addAll(datas);
         progressDialog.dismiss();
-        DatabaseHandler db = new DatabaseHandler(this);
         for (Data data : datas) {
             db.addData(data);
         }
@@ -58,5 +59,18 @@ public class MainActivity extends AppCompatActivity implements GetService.LoadPa
     @Override public void onLoadFailed(String message) {
         progressDialog.dismiss();
         Toast.makeText(this, "Load Failed : " + message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override public void onBackPressed() {
+        if (!datas.isEmpty()) {
+            for (Data data : datas) {
+                db.deleteData(data);
+            }
+
+            finish();
+        } else {
+            super.onBackPressed();
+        }
+
     }
 }

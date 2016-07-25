@@ -1,8 +1,10 @@
 package com.tyas.test.assignyas.repository.service.server;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.tyas.test.assignyas.BuildConfig;
@@ -28,15 +30,15 @@ import okhttp3.Response;
 public class GetService {
 
     private OkHttpClient client = new OkHttpClient();
-    private Request request;
 
     public static GetService getInstance() {
         return new GetService();
     }
 
     public void getAll(final LoadPattern loadPattern) {
-        request = new Request.Builder()
+        Request request = new Request.Builder()
                 .url(BuildConfig.BASE_URL)
+                .get()
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -49,12 +51,11 @@ public class GetService {
             }
 
             @Override public void onResponse(Call call, final Response response) throws IOException {
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override public void run() {
+                new AsyncTask<Void, Void, Void>() {
+                    @Override protected Void doInBackground(Void... voids) {
                         if (response.isSuccessful()) {
                             try {
                                 List<Data> datas = new ArrayList<>();
-                                Log.d(getClass().getName(), "response : " + response.body().toString());
                                 JSONArray jsonArray = new JSONArray(response.body().string());
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -74,11 +75,11 @@ public class GetService {
                             } catch (JSONException | IOException e) {
                                 e.printStackTrace();
                             }
-                        } else {
-                            loadPattern.onLoadFailed("Data not loaded");
                         }
+
+                        return null;
                     }
-                });
+                }.execute();
             }
         });
     }
